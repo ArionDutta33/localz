@@ -1,8 +1,9 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Home from '../screens/LocalShop/Home';
 import {RootStackParamList} from '../types/navigation-types';
 import GettingStartedScreen from '../screens/GettingStartedScreen';
+import StoreSelect from '../screens/StoreSelect';
+import LocalHome from '../screens/LocalShop/LocalHome';
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,8 +16,13 @@ const RootNavigation = () => {
       />
       <Stack.Screen
         options={{headerShown: false}}
-        name="Home"
-        component={Home}
+        name="StoreSelect"
+        component={StoreSelect}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="LocalHome"
+        component={LocalHome}
       />
     </Stack.Navigator>
   );

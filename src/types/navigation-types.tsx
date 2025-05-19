@@ -1,4 +1,5 @@
 export type RootStackParamList = {
-  Home: undefined;
+  StoreSelect: undefined;
   GettingStarted: undefined;
+  LocalHome: undefined;
 };

@@ -9,6 +9,9 @@ import {
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../types/navigation-types';
 
 const {width, height} = Dimensions.get('window');
 
@@ -51,7 +54,12 @@ const circleImages = [
   },
 ];
 
+type GettingStartedScreenProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'GettingStarted'
+>;
 const GettingStartedScreen = () => {
+  const navigate = useNavigation<GettingStartedScreenProp>();
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient style={styles.container} colors={['#7F55B1', '#def2f1']}>
@@ -95,7 +103,9 @@ const GettingStartedScreen = () => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigate.navigate('StoreSelect')}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </LinearGradient>
