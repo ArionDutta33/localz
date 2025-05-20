@@ -61,7 +61,9 @@ const GettingStartedScreen = () => {
   const navigate = useNavigation<GettingStartedScreenProp>();
   return (
     // <SafeAreaView style={styles.safeArea}>
-    <LinearGradient style={styles.container} colors={['#7F55B1', '#def2f1']}>
+    <LinearGradient
+      style={styles.container}
+      colors={['#7F55B1', '#fff', '#d9d9d9']}>
       {/* Circle Images Overlay */}
       <View style={styles.circlesContainer}>
         {circleImages.map(image => (
@@ -104,7 +106,7 @@ const GettingStartedScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigate.replace('StoreSelect')}>
+        onPress={() => navigate.navigate('StoreSelect')}>
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
     </LinearGradient>

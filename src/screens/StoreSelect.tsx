@@ -22,6 +22,7 @@ const StoreSelect = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.mainText}>Discover Our Stores</Text>
       {/* Fashion Store */}
       <TouchableOpacity
         style={styles.card}
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 20,
     justifyContent: 'center',
-    backgroundColor: '#f7f7f7',
+    backgroundColor: '#E2DAC5',
   },
   card: {
     borderRadius: 15,
@@ -140,5 +141,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: 'white',
     fontWeight: 'bold',
+  },
+  mainText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 32,
+    color: 'white',
   },
 });
