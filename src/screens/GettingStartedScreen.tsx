@@ -7,7 +7,6 @@ import {
   Dimensions,
 } from 'react-native';
 import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -61,55 +60,55 @@ type GettingStartedScreenProp = NativeStackNavigationProp<
 const GettingStartedScreen = () => {
   const navigate = useNavigation<GettingStartedScreenProp>();
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <LinearGradient style={styles.container} colors={['#7F55B1', '#def2f1']}>
-        {/* Circle Images Overlay */}
-        <View style={styles.circlesContainer}>
-          {circleImages.map(image => (
-            <View
-              key={image.id}
-              style={[
-                styles.circle,
-                {
-                  width: image.size,
-                  height: image.size,
-                  borderRadius: image.size / 2,
-                  top: image.top,
-                  left: image.left,
-                },
-              ]}>
-              <Image
-                source={{uri: image.uri}}
-                style={styles.circleImage}
-                resizeMode="cover"
-              />
-            </View>
-          ))}
-        </View>
+    // <SafeAreaView style={styles.safeArea}>
+    <LinearGradient style={styles.container} colors={['#7F55B1', '#def2f1']}>
+      {/* Circle Images Overlay */}
+      <View style={styles.circlesContainer}>
+        {circleImages.map(image => (
+          <View
+            key={image.id}
+            style={[
+              styles.circle,
+              {
+                width: image.size,
+                height: image.size,
+                borderRadius: image.size / 2,
+                top: image.top,
+                left: image.left,
+              },
+            ]}>
+            <Image
+              source={{uri: image.uri}}
+              style={styles.circleImage}
+              resizeMode="cover"
+            />
+          </View>
+        ))}
+      </View>
 
-        {/* Text Content */}
-        <View style={styles.textContainer}>
-          <Text style={styles.mainText}>
-            Where Trends Live and{' '}
-            <Text style={styles.subText}>Hype Thrives.</Text>
-          </Text>
-        </View>
+      {/* Text Content */}
+      <View style={styles.textContainer}>
+        <Text style={styles.mainText}>
+          Where Trends Live and{' '}
+          <Text style={styles.subText}>Hype Thrives.</Text>
+        </Text>
+      </View>
 
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionText}>
-            Discover the latest in popculture, lifestyle trends, and viral
-            moments— all in one place. Join the community that's always ahead of
-            the curve
-          </Text>
-        </View>
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.descriptionText}>
+          Discover the latest in popculture, lifestyle trends, and viral
+          moments— all in one place. Join the community that's always ahead of
+          the curve
+        </Text>
+      </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigate.navigate('StoreSelect')}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    </SafeAreaView>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigate.replace('StoreSelect')}>
+        <Text style={styles.buttonText}>Get Started</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+    // </SafeAreaView>
   );
 };
 
