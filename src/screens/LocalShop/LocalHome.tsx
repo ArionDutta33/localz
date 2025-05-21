@@ -10,10 +10,8 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
-  Animated,
-  Easing,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
@@ -22,12 +20,14 @@ import {
   faLocationDot,
   faMapPin,
   faSearch,
-  faStore,
 } from '@fortawesome/free-solid-svg-icons';
 import ShopCard from '../../components/ShopCard';
 import {Marquee} from '@animatereactnative/marquee';
 import LinearGradient from 'react-native-linear-gradient';
 import UseGetAllProducts from '../../hooks/use-get-all-products';
+import {useNavigation} from '@react-navigation/native';
+import {RootTabParamList} from '../../types/navigation-types';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 
 const {width} = Dimensions.get('window');
 
@@ -46,95 +46,22 @@ const THEME = {
   lightText: '#A0A0A0', // Gray text
   accent: '#D5EF74', // Same as primary
 };
-
-// Custom loading component with animations
-const LoadingState = () => {
-  const pulseAnim = useRef(new Animated.Value(0.8)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  // Pulse animation
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.8,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-  }, [pulseAnim]);
-
-  // Rotation animation
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ).start();
-  }, [rotateAnim]);
-
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  return (
-    <View style={styles.loadingContainer}>
-      <LinearGradient
-        colors={[THEME.background, 'rgba(21, 22, 29, 0.9)']}
-        style={styles.loadingGradient}>
-        <View style={styles.loadingContent}>
-          <Animated.View
-            style={[
-              styles.iconCircle,
-              {transform: [{scale: pulseAnim}, {rotate}]},
-            ]}>
-            <FontAwesomeIcon
-              icon={faStore}
-              size={30}
-              color={THEME.background}
-            />
-          </Animated.View>
-          <Text style={styles.loadingTitle}>Loading Stores</Text>
-          <Text style={styles.loadingSubtitle}>
-            Discovering trending products
-          </Text>
-          <View style={styles.loadingBar}>
-            <Animated.View
-              style={[
-                styles.loadingProgress,
-                {transform: [{scaleX: pulseAnim}]},
-              ]}
-            />
-          </View>
-        </View>
-      </LinearGradient>
-    </View>
-  );
-};
-
+type LocalHomeProps = BottomTabNavigationProp<RootTabParamList, 'Home'>;
 const LocalHome = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-
+  const [location, setLocation] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const navigation = useNavigation<LocalHomeProps>();
   const {products, loading, error} = UseGetAllProducts();
   const limitedProducts = products.slice(0, 6);
-
-  // Early return when loading
   if (loading) {
-    return <LoadingState />;
+    <ActivityIndicator size={'large'} color={'black'} />;
   }
+
+  const handleRedirect = () => {
+    navigation.navigate('Search');
+  };
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>
@@ -166,21 +93,30 @@ const LocalHome = () => {
               {['Guwahati', 'Jorhat', 'Dibrugarh', 'Tezpur'].map(
                 (city, index) => (
                   <TouchableOpacity
+                    onPress={() => {
+                      setSelectedIndex(index);
+                      setLocation(city);
+                    }}
                     key={index}
                     style={[
                       styles.locationItem,
-                      index === 1 && styles.activeLocation,
+                      //how to make this dynamic
+                      index === selectedIndex && styles.activeLocation,
                     ]}>
                     <FontAwesomeIcon
                       icon={faMapPin}
-                      color={index === 1 ? THEME.primary : THEME.lightText}
+                      color={
+                        index === selectedIndex
+                          ? THEME.primary
+                          : THEME.lightText
+                      }
                       size={14}
                       style={{marginRight: 10}}
                     />
                     <Text
                       style={[
                         styles.locationText,
-                        index === 1 && {
+                        index === selectedIndex && {
                           color: THEME.primary,
                           fontFamily: 'Poppins-SemiBold',
                         },
@@ -207,7 +143,7 @@ const LocalHome = () => {
           style={styles.locationSelector}
           onPress={() => setModalVisible(true)}>
           <FontAwesomeIcon icon={faMapPin} color={THEME.primary} size={18} />
-          <Text style={styles.locationText}>Jorhat</Text>
+          <Text style={styles.locationText}>{location}</Text>
           <View style={styles.locationDot} />
         </TouchableOpacity>
 
@@ -248,7 +184,9 @@ const LocalHome = () => {
             style={styles.textInput}
           />
         </View>
-        <TouchableOpacity style={styles.searchTextContainer}>
+        <TouchableOpacity
+          onPress={handleRedirect}
+          style={styles.searchTextContainer}>
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
       </View>
@@ -294,7 +232,7 @@ const LocalHome = () => {
         {/* Section Title */}
         <View style={styles.sectionTitleContainer}>
           <Text style={styles.sectionTitle}>Featured Collections</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleRedirect}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
@@ -357,7 +295,7 @@ const LocalHome = () => {
         {/* Section Title */}
         <View style={styles.sectionTitleContainer}>
           <Text style={styles.sectionTitle}>Popular Stores</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleRedirect}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
@@ -431,6 +369,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
   },
   searchBar: {
+    position: 'relative',
     marginHorizontal: 20,
     marginTop: 6,
     marginBottom: 16,
@@ -712,64 +651,5 @@ const styles = StyleSheet.create({
     color: THEME.lightText,
     fontFamily: 'Poppins-Medium',
     fontSize: 16,
-  },
-  // Loading state styles
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: THEME.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingGradient: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: THEME.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: THEME.primary,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  loadingTitle: {
-    fontSize: 24,
-    fontFamily: 'Poppins-Bold',
-    color: THEME.secondary,
-    marginBottom: 8,
-  },
-  loadingSubtitle: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: THEME.lightText,
-    marginBottom: 32,
-  },
-  loadingBar: {
-    width: 240,
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  loadingProgress: {
-    height: '100%',
-    width: '100%',
-    backgroundColor: THEME.primary,
-    borderRadius: 3,
   },
 });
