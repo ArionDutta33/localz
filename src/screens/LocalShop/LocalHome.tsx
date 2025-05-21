@@ -5,329 +5,282 @@ import {
   View,
   Modal,
   TouchableOpacity,
-  Alert,
   ScrollView,
   ImageBackground,
   Dimensions,
   StatusBar,
-  Animated,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
-  faLocationDot,
-  faSearch,
-  faTimes,
+  faBagShopping,
   faHeart,
-  faShoppingBag,
+  faLocationDot,
+  faMapPin,
+  faSearch,
 } from '@fortawesome/free-solid-svg-icons';
 import ShopCard from '../../components/ShopCard';
 import {Marquee} from '@animatereactnative/marquee';
-import {BlurView} from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 
 const {width} = Dimensions.get('window');
 
-const featuredItems = [
-  {
-    id: 1,
-    image:
-      'https://images.unsplash.com/photo-1638993606271-04836e75d662?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fG1vZGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-    title: 'Summer Collection',
-    subtitle: 'New Arrivals',
-  },
-  {
-    id: 2,
-    image:
-      'https://images.unsplash.com/photo-1590739225287-bd31519780c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGx1eHVyeSUyMGJhZ3N8ZW58MHx8MHx8fDA%3D',
-    title: 'Luxury Bags',
-    subtitle: 'Premium Selection',
-  },
-  {
-    id: 3,
-    image:
-      'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2hvZXN8ZW58MHx8MHx8fDA%3D',
-    title: 'Footwear',
-    subtitle: 'Trending Now',
-  },
+const imageUrls = [
+  'https://images.unsplash.com/photo-1638993606271-04836e75d662?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fG1vZGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+  'https://images.unsplash.com/photo-1590739225287-bd31519780c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGx1eHVyeSUyMGJhZ3N8ZW58MHx8MHx8fDA%3D',
+  'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2hvZXN8ZW58MHx8MHx8fDA%3D',
 ];
+
+const THEME = {
+  primary: '#FF6B35', // Vibrant orange
+  secondary: '#2E294E', // Deep purple
+  background: '#F7F7F2', // Light cream
+  card: '#FFFFFF', // White
+  text: '#252422', // Dark text
+  lightText: '#6D6A75', // Gray text
+  accent: '#FFD166', // Yellow accent
+};
 
 const LocalHome = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('Guwahati');
-  const [searchText, setSearchText] = useState('');
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const carouselRef = useRef(null);
-  const [activeSlide, setActiveSlide] = useState(0);
-
-  // Auto scroll for carousel
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (carouselRef.current) {
-        const nextSlide = (activeSlide + 1) % featuredItems.length;
-        carouselRef.current.scrollTo({x: nextSlide * width, animated: true});
-        setActiveSlide(nextSlide);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [activeSlide]);
-
-  const handleScroll = Animated.event(
-    [{nativeEvent: {contentOffset: {x: scrollX}}}],
-    {useNativeDriver: false},
-  );
-
-  const handleMomentumScrollEnd = event => {
-    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-    setActiveSlide(slideIndex);
-  };
-
-  const selectLocation = location => {
-    setSelectedLocation(location);
-    setModalVisible(false);
-  };
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F5F0" />
+      <StatusBar backgroundColor={THEME.background} barStyle="dark-content" />
 
-      {/* Location Selection Modal */}
+      {/* Location Modal */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose Your Location</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <FontAwesomeIcon icon={faTimes} size={18} color="#333" />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.modalTitle}>Choose Your Location</Text>
 
             <TouchableOpacity style={styles.locationBtn}>
               <FontAwesomeIcon
                 icon={faLocationDot}
                 color="white"
                 size={16}
-                style={styles.btnIcon}
+                style={{marginRight: 8}}
               />
               <Text style={styles.btnText}>Auto Detect My Location</Text>
             </TouchableOpacity>
 
             <View style={styles.locationList}>
-              {[
-                'Guwahati',
-                'Jorhat',
-                'Dibrugarh',
-                'Tezpur',
-                'Silchar',
-                'Nagaon',
-              ].map((city, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.locationItem,
-                    selectedLocation === city && styles.locationItemSelected,
-                  ]}
-                  onPress={() => selectLocation(city)}>
-                  <Text
+              {['Guwahati', 'Jorhat', 'Dibrugarh', 'Tezpur'].map(
+                (city, index) => (
+                  <TouchableOpacity
+                    key={index}
                     style={[
-                      styles.locationText,
-                      selectedLocation === city && styles.locationTextSelected,
+                      styles.locationItem,
+                      index === 1 && styles.activeLocation,
                     ]}>
-                    {city}
-                  </Text>
-                  {selectedLocation === city && (
                     <FontAwesomeIcon
-                      icon={faLocationDot}
-                      color="#FF6B00"
+                      icon={faMapPin}
+                      color={index === 1 ? THEME.primary : THEME.lightText}
                       size={14}
+                      style={{marginRight: 10}}
                     />
-                  )}
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.locationText,
+                        index === 1 && {
+                          color: THEME.primary,
+                          fontFamily: 'Poppins-SemiBold',
+                        },
+                      ]}>
+                      {city}
+                    </Text>
+                  </TouchableOpacity>
+                ),
+              )}
             </View>
+
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => setModalVisible(false)}>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.mainScrollContainer}>
-        {/* Header and Search Bar */}
-        <View style={styles.header}>
-          <View style={styles.locationButton}>
-            <TouchableOpacity
-              onPress={() => setModalVisible(true)}
-              style={styles.locationDisplay}>
-              <FontAwesomeIcon icon={faLocationDot} color="#FF6B00" size={16} />
-              <Text style={styles.locationDisplayText}>{selectedLocation}</Text>
-            </TouchableOpacity>
+      {/* Top Navigation Bar */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.locationSelector}
+          onPress={() => setModalVisible(true)}>
+          <FontAwesomeIcon icon={faMapPin} color={THEME.primary} size={18} />
+          <Text style={styles.locationText}>Jorhat</Text>
+          <View style={styles.locationDot} />
+        </TouchableOpacity>
 
-            <View style={styles.headerIcons}>
-              <TouchableOpacity style={styles.iconButton}>
-                <FontAwesomeIcon icon={faHeart} color="#333" size={18} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <FontAwesomeIcon icon={faShoppingBag} color="#333" size={18} />
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>2</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.searchBar}>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.iconButton}>
+            <FontAwesomeIcon icon={faHeart} color={THEME.secondary} size={20} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
             <FontAwesomeIcon
-              icon={faSearch}
-              color="#888"
-              size={16}
-              style={styles.searchIcon}
+              icon={faBagShopping}
+              color={THEME.secondary}
+              size={20}
             />
-            <TextInput
-              placeholder="Search for products, brands and more"
-              placeholderTextColor={'#888'}
-              style={styles.textInput}
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchText('')}
-                style={styles.clearButton}>
-                <FontAwesomeIcon icon={faTimes} color="#888" size={16} />
-              </TouchableOpacity>
-            )}
-          </View>
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>2</Text>
+            </View>
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Promotional Banner */}
-        <View style={styles.promotionContainer}>
-          <LinearGradient
-            colors={['#FF6B00', '#FF9248']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={styles.promotion}>
-            <Marquee spacing={40} speed={0.5} style={styles.marquee}>
-              <Text style={styles.promotionText}>
-                🔥 FLASH SALE: GET 50% OFF ON ALL ITEMS TODAY! 🔥
-              </Text>
-            </Marquee>
-          </LinearGradient>
+      {/* Search Bar */}
+      <View style={styles.searchBar}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.iconContainer}>
+          <FontAwesomeIcon icon={faLocationDot} color="white" size={14} />
+        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <FontAwesomeIcon
+            icon={faSearch}
+            color={THEME.lightText}
+            size={16}
+            style={{marginRight: 8}}
+          />
+          <TextInput
+            placeholder="Search for stores"
+            placeholderTextColor={THEME.lightText}
+            style={styles.textInput}
+          />
         </View>
+        <TouchableOpacity style={styles.searchTextContainer}>
+          <Text style={styles.searchText}>Search</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Featured Deal */}
-        <TouchableOpacity style={styles.adContainer}>
+      {/* Promo Banner */}
+      <View style={styles.label}>
+        <Marquee spacing={20} speed={0.5}>
+          <Text style={styles.labelText}>
+            FLAT 50% OFF ON ALL STORES • WEEKEND SALE LIVE NOW
+          </Text>
+        </Marquee>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView
+        style={styles.mainContent}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 20}}>
+        {/* Featured Ad Banner */}
+        <View style={styles.adContainer}>
           <ImageBackground
             style={styles.adImage}
-            imageStyle={styles.adImageStyle}
+            imageStyle={{borderRadius: 16}}
             source={{
               uri: 'https://images.unsplash.com/photo-1739444929269-341792e2a4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGFkaWRhcyUyMHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D',
             }}>
             <LinearGradient
               colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
               style={styles.overlay}>
-              <View style={styles.dealContent}>
-                <View style={styles.dealTag}>
-                  <Text style={styles.dealTagText}>LIMITED TIME</Text>
+              <View style={styles.overlayContent}>
+                <View style={styles.promoTag}>
+                  <Text style={styles.promoTagText}>TODAY ONLY</Text>
                 </View>
-                <Text style={styles.dealTitle}>SUMMER SALE</Text>
-                <Text style={styles.dealDescription}>
-                  Up to 80% off on selected items
+                <Text style={styles.overlayTextLarge}>80% OFF</Text>
+                <Text style={styles.overlayTextSmall}>
+                  WITH CODE: <Text style={styles.promoCode}>SHOP435</Text>
                 </Text>
-                <View style={styles.codeContainer}>
-                  <Text style={styles.codeLabel}>USE CODE:</Text>
-                  <Text style={styles.codeValue}>SHOP435</Text>
-                </View>
                 <TouchableOpacity style={styles.shopNowButton}>
                   <Text style={styles.shopNowText}>SHOP NOW</Text>
                 </TouchableOpacity>
               </View>
             </LinearGradient>
           </ImageBackground>
-        </TouchableOpacity>
+        </View>
 
-        {/* Featured Categories Carousel */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured Collections</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Section Title */}
+        <View style={styles.sectionTitleContainer}>
+          <Text style={styles.sectionTitle}>Featured Collections</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.carouselContainer}>
-            <ScrollView
-              ref={carouselRef}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleScroll}
-              onMomentumScrollEnd={handleMomentumScrollEnd}
-              scrollEventThrottle={16}
-              decelerationRate="fast">
-              {featuredItems.map((item, index) => (
-                <TouchableOpacity key={item.id} style={styles.carouselSlide}>
-                  <ImageBackground
-                    source={{uri: item.image}}
-                    style={styles.carouselImage}
-                    imageStyle={styles.carouselImageStyle}>
-                    <LinearGradient
-                      colors={['transparent', 'rgba(0,0,0,0.7)']}
-                      style={styles.carouselOverlay}>
-                      <View style={styles.carouselContent}>
-                        <Text style={styles.carouselSubtitle}>
-                          {item.subtitle}
-                        </Text>
-                        <Text style={styles.carouselTitle}>{item.title}</Text>
-                        <TouchableOpacity style={styles.carouselButton}>
-                          <Text style={styles.carouselButtonText}>Explore</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </LinearGradient>
-                  </ImageBackground>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+        {/* Image Carousel */}
+        <View style={styles.carouselWrapper}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={event => {
+              const slideIndex = Math.floor(
+                event.nativeEvent.contentOffset.x / (width - 40),
+              );
+              setActiveCarouselIndex(slideIndex);
+            }}
+            style={styles.carouselContainer}
+            contentContainerStyle={{paddingHorizontal: 10}}
+            decelerationRate="fast"
+            snapToInterval={width - 40}>
+            {imageUrls.map((item, idx) => (
+              <View key={idx} style={styles.carouselItemContainer}>
+                <ImageBackground
+                  style={styles.carouselImageContainer}
+                  imageStyle={styles.carouselImage}
+                  source={{uri: item}}>
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.7)']}
+                    style={styles.carouselOverlay}>
+                    <Text style={styles.carouselTitle}>
+                      {idx === 0
+                        ? 'Summer Collection'
+                        : idx === 1
+                        ? 'Luxury Bags'
+                        : 'Trendy Footwear'}
+                    </Text>
+                    <TouchableOpacity style={styles.carouselButton}>
+                      <Text style={styles.carouselButtonText}>Explore</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </ImageBackground>
+              </View>
+            ))}
+          </ScrollView>
 
-            <View style={styles.paginationContainer}>
-              {featuredItems.map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.paginationDot,
-                    index === activeSlide && styles.paginationDotActive,
-                  ]}
-                />
-              ))}
-            </View>
+          {/* Carousel Indicators */}
+          <View style={styles.indicatorContainer}>
+            {imageUrls.map((_, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.indicator,
+                  activeCarouselIndex === idx ? styles.activeIndicator : {},
+                ]}
+              />
+            ))}
           </View>
         </View>
 
-        {/* Nearby Shops */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nearby Shops</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.shopsContainer}>
-            <ShopCard />
-            <ShopCard />
-            <ShopCard />
-          </View>
+        {/* Section Title */}
+        <View style={styles.sectionTitleContainer}>
+          <Text style={styles.sectionTitle}>Popular Stores</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            © 2025 ShopLocal. All rights reserved.
-          </Text>
+        {/* Shop Cards */}
+        <View style={styles.shopCardsContainer}>
+          <ShopCard />
+          <ShopCard />
+          <ShopCard />
+          <ShopCard />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -339,31 +292,32 @@ export default LocalHome;
 const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
-    backgroundColor: '#F8F5F0',
-  },
-  mainScrollContainer: {
-    paddingBottom: 30,
+    backgroundColor: THEME.background,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  locationButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  locationDisplay: {
+  locationSelector: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 6,
   },
-  locationDisplayText: {
+  locationText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: THEME.secondary,
+    marginLeft: 8,
+  },
+  locationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: THEME.primary,
     marginLeft: 6,
-    color: '#333',
   },
   headerIcons: {
     flexDirection: 'row',
@@ -371,235 +325,243 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 8,
-    marginLeft: 8,
+    marginLeft: 12,
     position: 'relative',
   },
-  badge: {
+  badgeContainer: {
     position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: '#FF6B00',
+    top: 0,
+    right: 0,
+    backgroundColor: THEME.primary,
     borderRadius: 10,
-    height: 16,
     width: 16,
+    height: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   badgeText: {
     color: 'white',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   searchBar: {
+    marginHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 16,
+    borderRadius: 12,
+    backgroundColor: THEME.card,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    padding: 6,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
-  searchIcon: {
-    marginRight: 10,
+  iconContainer: {
+    backgroundColor: THEME.primary,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  inputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   textInput: {
     flex: 1,
+    fontFamily: 'Poppins-Regular',
     fontSize: 14,
-    color: '#333',
+    color: THEME.text,
   },
-  clearButton: {
-    padding: 5,
-  },
-  promotionContainer: {
-    marginVertical: 12,
-  },
-  promotion: {
+  searchTextContainer: {
+    paddingHorizontal: 16,
     paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: THEME.primary,
   },
-  marquee: {
-    height: 24,
-  },
-  promotionText: {
+  searchText: {
+    fontFamily: 'Poppins-Medium',
     color: 'white',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+  },
+  label: {
+    backgroundColor: THEME.primary,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  labelText: {
+    color: 'white',
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+  },
+  mainContent: {
+    flex: 1,
   },
   adContainer: {
-    marginHorizontal: 16,
+    marginHorizontal: 20,
+    height: 160,
     borderRadius: 16,
     overflow: 'hidden',
-    height: 180,
+    marginBottom: 24,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
   },
   adImage: {
     width: '100%',
     height: '100%',
   },
-  adImageStyle: {
-    borderRadius: 16,
-  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderRadius: 16,
   },
-  dealContent: {
+  overlayContent: {
     alignItems: 'flex-start',
   },
-  dealTag: {
-    backgroundColor: 'white',
+  promoTag: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  dealTagText: {
-    color: '#FF6B00',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  dealTitle: {
+  promoTagText: {
     color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 12,
+    fontFamily: 'Poppins-Medium',
   },
-  dealDescription: {
+  overlayTextLarge: {
+    color: 'white',
+    fontSize: 28,
+    fontFamily: 'Poppins-Bold',
+    marginBottom: 2,
+  },
+  overlayTextSmall: {
     color: 'white',
     fontSize: 14,
-    marginBottom: 10,
-  },
-  codeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontFamily: 'Poppins-Medium',
     marginBottom: 12,
   },
-  codeLabel: {
-    color: 'white',
-    fontSize: 12,
-    marginRight: 6,
-  },
-  codeValue: {
-    color: '#FF9248',
-    fontSize: 16,
-    fontWeight: 'bold',
+  promoCode: {
+    color: THEME.accent,
+    fontFamily: 'Poppins-Bold',
   },
   shopNowButton: {
-    backgroundColor: '#FF6B00',
+    backgroundColor: THEME.accent,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingVertical: 6,
+    borderRadius: 4,
   },
   shopNowText: {
-    color: 'white',
-    fontWeight: '600',
+    fontFamily: 'Poppins-Bold',
     fontSize: 12,
+    color: THEME.secondary,
   },
-  sectionContainer: {
-    marginTop: 24,
-    paddingHorizontal: 16,
-  },
-  sectionHeader: {
+  sectionTitleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    fontFamily: 'Poppins-Bold',
+    color: THEME.secondary,
   },
-  seeAllText: {
-    color: '#FF6B00',
+  viewAllText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Poppins-Medium',
+    color: THEME.primary,
+  },
+  carouselWrapper: {
+    marginBottom: 24,
   },
   carouselContainer: {
-    marginHorizontal: -16,
+    height: 240,
   },
-  carouselSlide: {
-    width,
+  carouselItemContainer: {
+    width: width - 40,
     height: 220,
-    paddingHorizontal: 16,
+    marginHorizontal: 10,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
-  carouselImage: {
+  carouselImageContainer: {
     width: '100%',
     height: '100%',
-    justifyContent: 'flex-end',
   },
-  carouselImageStyle: {
+  carouselImage: {
     borderRadius: 16,
   },
   carouselOverlay: {
-    height: '60%',
+    flex: 1,
     justifyContent: 'flex-end',
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-  carouselContent: {
     padding: 16,
-  },
-  carouselSubtitle: {
-    color: 'white',
-    fontSize: 12,
-    opacity: 0.8,
-    marginBottom: 4,
+    borderRadius: 16,
   },
   carouselTitle: {
     color: 'white',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-SemiBold',
     marginBottom: 8,
   },
   carouselButton: {
     backgroundColor: 'white',
     paddingHorizontal: 16,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 4,
     alignSelf: 'flex-start',
   },
   carouselButtonText: {
-    color: '#333',
-    fontWeight: '600',
+    color: THEME.secondary,
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 12,
   },
-  paginationContainer: {
+  indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
   },
-  paginationDot: {
+  indicator: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ccc',
-    margin: 4,
+    backgroundColor: '#D9D9D9',
+    marginHorizontal: 4,
   },
-  paginationDotActive: {
-    backgroundColor: '#FF6B00',
-    width: 12,
-    height: 8,
+  activeIndicator: {
+    backgroundColor: THEME.primary,
+    width: 20,
   },
-  shopsContainer: {
-    marginTop: 8,
-  },
-  footer: {
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  footerText: {
-    color: '#888',
-    fontSize: 12,
+  shopCardsContainer: {
+    paddingHorizontal: 20,
+    gap: 16,
   },
   modalBackdrop: {
     flex: 1,
@@ -609,70 +571,72 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: '85%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: THEME.card,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
     elevation: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 20,
+    fontFamily: 'Poppins-Bold',
+    color: THEME.secondary,
+    marginBottom: 20,
   },
   locationBtn: {
-    backgroundColor: '#FF6B00',
+    backgroundColor: THEME.primary,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
     marginVertical: 10,
     width: '100%',
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
-  },
-  btnIcon: {
-    marginRight: 8,
   },
   btnText: {
     color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
   },
   locationList: {
     width: '100%',
-    marginVertical: 10,
+    marginVertical: 16,
   },
   locationItem: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#F0F0F0',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  locationItemSelected: {
-    backgroundColor: '#FFF8F3',
+  activeLocation: {
+    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    borderRadius: 8,
+    borderBottomWidth: 0,
+    marginVertical: 4,
   },
-  locationText: {
+  cancelBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  cancelBtnText: {
+    color: THEME.lightText,
+    fontFamily: 'Poppins-Medium',
     fontSize: 16,
-    color: '#333',
-  },
-  locationTextSelected: {
-    color: '#FF6B00',
-    fontWeight: '600',
   },
 });
