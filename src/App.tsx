@@ -1,12 +1,15 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import RootNavigation from './navigation/RootNavigation';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <RootNavigation />
-    </NavigationContainer>
+    <GestureHandlerRootView>
+      <NavigationContainer>
+        <RootNavigation />
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
 

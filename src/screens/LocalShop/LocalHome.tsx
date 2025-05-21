@@ -16,6 +16,12 @@ import {faLocationDot} from '@fortawesome/free-solid-svg-icons';
 import ShopCard from '../../components/ShopCard';
 import {Marquee} from '@animatereactnative/marquee';
 
+const imageUrls = [
+  'https://images.unsplash.com/photo-1638993606271-04836e75d662?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fG1vZGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+  'https://images.unsplash.com/photo-1590739225287-bd31519780c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGx1eHVyeSUyMGJhZ3N8ZW58MHx8MHx8fDA%3D',
+  'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2hvZXN8ZW58MHx8MHx8fDA%3D',
+];
+
 const LocalHome = () => {
   const [modalVisible, setModalVisible] = useState(false);
   return (
@@ -74,8 +80,8 @@ const LocalHome = () => {
         </View>
       </View>
       <View style={styles.label}>
-        <Marquee spacing={20} speed={1}>
-          <Text>Powered by AnimateReactNative.com</Text>
+        <Marquee spacing={20} speed={0.5}>
+          <Text style={styles.labelText}>FLAT 50 % ON ALL STORES</Text>
         </Marquee>
       </View>
       <View style={styles.adContainer}>
@@ -99,9 +105,16 @@ const LocalHome = () => {
           </View>
         </ImageBackground>
       </View>
-      <View>
-        <Text>chck</Text>
-      </View>
+      <ScrollView style={styles.carouselContainer} horizontal pagingEnabled>
+        {imageUrls.map((item, idx) => (
+          <ImageBackground
+            style={styles.carouselImageContainer}
+            source={{uri: item}}
+            key={idx}>
+            <Text>{item}</Text>
+          </ImageBackground>
+        ))}
+      </ScrollView>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <ShopCard />
         <ShopCard />
@@ -237,5 +250,15 @@ const styles = StyleSheet.create({
   },
   label: {
     backgroundColor: '#fb8500',
+    justifyContent: 'center',
   },
+  labelText: {
+    color: 'white',
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 20,
+  },
+  carouselImageContainer: {
+    height: 300,
+  },
+  carouselContainer: {},
 });
