@@ -189,9 +189,9 @@ const LocalHome = () => {
               colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
               style={styles.overlay}>
               <View style={styles.overlayContent}>
-                <View style={styles.promoTag}>
+                {/* <View style={styles.promoTag}>
                   <Text style={styles.promoTagText}>TODAY ONLY</Text>
-                </View>
+                </View> */}
                 <Text style={styles.overlayTextLarge}>80% OFF</Text>
                 <Text style={styles.overlayTextSmall}>
                   WITH CODE: <Text style={styles.promoCode}>SHOP435</Text>
@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
+
     paddingVertical: 12,
   },
   locationSelector: {
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 6,
     marginBottom: 16,
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: THEME.card,
     flexDirection: 'row',
     alignItems: 'center',
@@ -358,6 +359,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
+
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
     elevation: 3,
@@ -366,9 +368,10 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.primary,
     height: 40,
     width: 40,
+
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 999,
   },
   inputContainer: {
     flex: 1,
@@ -385,7 +388,7 @@ const styles = StyleSheet.create({
   searchTextContainer: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 999,
     backgroundColor: THEME.primary,
   },
   searchText: {
@@ -435,13 +438,13 @@ const styles = StyleSheet.create({
   overlayContent: {
     alignItems: 'flex-start',
   },
-  promoTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginBottom: 6,
-  },
+  // promoTag: {
+  //   backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 4,
+  //   borderRadius: 4,
+  //   marginBottom: 6,
+  // },
   promoTagText: {
     color: 'white',
     fontSize: 12,
