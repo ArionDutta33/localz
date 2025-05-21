@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../types/navigation-types';
 import GettingStartedScreen from '../screens/GettingStartedScreen';
 import StoreSelect from '../screens/StoreSelect';
-import LocalHome from '../screens/LocalShop/LocalHome';
+import TabNavigation from './tabs/TabNavigation';
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -21,8 +21,8 @@ const RootNavigation = () => {
       />
       <Stack.Screen
         options={{headerShown: false}}
-        name="LocalHome"
-        component={LocalHome}
+        name="LocalStore"
+        component={TabNavigation}
       />
     </Stack.Navigator>
   );

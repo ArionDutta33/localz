@@ -53,7 +53,7 @@ const StoreSelect = () => {
       {/* Grocery Store */}
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate('LocalHome')}>
+        onPress={() => navigation.navigate('LocalStore')}>
         <ImageBackground
           imageStyle={styles.imageBackground}
           style={styles.imageWrapper}
