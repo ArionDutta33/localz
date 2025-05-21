@@ -9,8 +9,11 @@ import {
   ImageBackground,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
+  Animated,
+  Easing,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
@@ -19,10 +22,12 @@ import {
   faLocationDot,
   faMapPin,
   faSearch,
+  faStore,
 } from '@fortawesome/free-solid-svg-icons';
 import ShopCard from '../../components/ShopCard';
 import {Marquee} from '@animatereactnative/marquee';
 import LinearGradient from 'react-native-linear-gradient';
+import UseGetAllProducts from '../../hooks/use-get-all-products';
 
 const {width} = Dimensions.get('window');
 
@@ -33,22 +38,107 @@ const imageUrls = [
 ];
 
 const THEME = {
-  primary: '#FF6B35', // Vibrant orange
-  secondary: '#2E294E', // Deep purple
-  background: '#F7F7F2', // Light cream
-  card: '#FFFFFF', // White
-  text: '#252422', // Dark text
-  lightText: '#6D6A75', // Gray text
-  accent: '#FFD166', // Yellow accent
+  primary: '#D5EF74', // New accent color
+  secondary: '#FFFFFF', // White text/icons
+  background: '#15161D', // Dark background
+  card: '#1E1F29', // Dark cards
+  text: '#FFFFFF', // White text
+  lightText: '#A0A0A0', // Gray text
+  accent: '#D5EF74', // Same as primary
+};
+
+// Custom loading component with animations
+const LoadingState = () => {
+  const pulseAnim = useRef(new Animated.Value(0.8)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  // Pulse animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.8,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [pulseAnim]);
+
+  // Rotation animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ).start();
+  }, [rotateAnim]);
+
+  const rotate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  return (
+    <View style={styles.loadingContainer}>
+      <LinearGradient
+        colors={[THEME.background, 'rgba(21, 22, 29, 0.9)']}
+        style={styles.loadingGradient}>
+        <View style={styles.loadingContent}>
+          <Animated.View
+            style={[
+              styles.iconCircle,
+              {transform: [{scale: pulseAnim}, {rotate}]},
+            ]}>
+            <FontAwesomeIcon
+              icon={faStore}
+              size={30}
+              color={THEME.background}
+            />
+          </Animated.View>
+          <Text style={styles.loadingTitle}>Loading Stores</Text>
+          <Text style={styles.loadingSubtitle}>
+            Discovering trending products
+          </Text>
+          <View style={styles.loadingBar}>
+            <Animated.View
+              style={[
+                styles.loadingProgress,
+                {transform: [{scaleX: pulseAnim}]},
+              ]}
+            />
+          </View>
+        </View>
+      </LinearGradient>
+    </View>
+  );
 };
 
 const LocalHome = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
 
+  const {products, loading, error} = UseGetAllProducts();
+  const limitedProducts = products.slice(0, 6);
+
+  // Early return when loading
+  if (loading) {
+    return <LoadingState />;
+  }
+
   return (
     <SafeAreaView style={styles.safeAreaContainer}>
-      <StatusBar backgroundColor={THEME.background} barStyle="dark-content" />
+      <StatusBar backgroundColor={THEME.background} barStyle="light-content" />
 
       {/* Location Modal */}
       <Modal
@@ -65,7 +155,7 @@ const LocalHome = () => {
             <TouchableOpacity style={styles.locationBtn}>
               <FontAwesomeIcon
                 icon={faLocationDot}
-                color="white"
+                color="#15161D"
                 size={16}
                 style={{marginRight: 8}}
               />
@@ -143,7 +233,7 @@ const LocalHome = () => {
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={styles.iconContainer}>
-          <FontAwesomeIcon icon={faLocationDot} color="white" size={14} />
+          <FontAwesomeIcon icon={faLocationDot} color="#15161D" size={14} />
         </TouchableOpacity>
         <View style={styles.inputContainer}>
           <FontAwesomeIcon
@@ -189,9 +279,6 @@ const LocalHome = () => {
               colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
               style={styles.overlay}>
               <View style={styles.overlayContent}>
-                {/* <View style={styles.promoTag}>
-                  <Text style={styles.promoTagText}>TODAY ONLY</Text>
-                </View> */}
                 <Text style={styles.overlayTextLarge}>80% OFF</Text>
                 <Text style={styles.overlayTextSmall}>
                   WITH CODE: <Text style={styles.promoCode}>SHOP435</Text>
@@ -277,10 +364,9 @@ const LocalHome = () => {
 
         {/* Shop Cards */}
         <View style={styles.shopCardsContainer}>
-          <ShopCard />
-          <ShopCard />
-          <ShopCard />
-          <ShopCard />
+          {limitedProducts.map(item => (
+            <ShopCard key={item.id} />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -299,7 +385,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-
     paddingVertical: 12,
   },
   locationSelector: {
@@ -341,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeText: {
-    color: 'white',
+    color: '#15161D',
     fontSize: 10,
     fontFamily: 'Poppins-Bold',
   },
@@ -359,7 +444,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
     elevation: 3,
@@ -368,7 +452,6 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.primary,
     height: 40,
     width: 40,
-
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 999,
@@ -393,7 +476,7 @@ const styles = StyleSheet.create({
   },
   searchText: {
     fontFamily: 'Poppins-Medium',
-    color: 'white',
+    color: '#15161D',
     fontSize: 14,
   },
   label: {
@@ -402,7 +485,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   labelText: {
-    color: 'white',
+    color: '#15161D',
     fontFamily: 'Poppins-SemiBold',
     fontSize: 14,
   },
@@ -438,18 +521,6 @@ const styles = StyleSheet.create({
   overlayContent: {
     alignItems: 'flex-start',
   },
-  // promoTag: {
-  //   backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  //   paddingHorizontal: 10,
-  //   paddingVertical: 4,
-  //   borderRadius: 4,
-  //   marginBottom: 6,
-  // },
-  promoTagText: {
-    color: 'white',
-    fontSize: 12,
-    fontFamily: 'Poppins-Medium',
-  },
   overlayTextLarge: {
     color: 'white',
     fontSize: 28,
@@ -475,7 +546,7 @@ const styles = StyleSheet.create({
   shopNowText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 12,
-    color: THEME.secondary,
+    color: '#15161D',
   },
   sectionTitleContainer: {
     flexDirection: 'row',
@@ -542,7 +613,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   carouselButtonText: {
-    color: THEME.secondary,
+    color: '#15161D',
     fontFamily: 'Poppins-SemiBold',
     fontSize: 12,
   },
@@ -555,7 +626,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: '#2E2E3A',
     marginHorizontal: 4,
   },
   activeIndicator: {
@@ -605,7 +676,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnText: {
-    color: 'white',
+    color: '#15161D',
     fontFamily: 'Poppins-SemiBold',
     fontSize: 16,
   },
@@ -617,12 +688,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#2E2E3A',
     flexDirection: 'row',
     alignItems: 'center',
   },
   activeLocation: {
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: 'rgba(213, 239, 116, 0.1)',
     borderRadius: 8,
     borderBottomWidth: 0,
     marginVertical: 4,
@@ -635,11 +706,70 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#2E2E3A',
   },
   cancelBtnText: {
     color: THEME.lightText,
     fontFamily: 'Poppins-Medium',
     fontSize: 16,
+  },
+  // Loading state styles
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: THEME.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingGradient: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: THEME.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: THEME.primary,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  loadingTitle: {
+    fontSize: 24,
+    fontFamily: 'Poppins-Bold',
+    color: THEME.secondary,
+    marginBottom: 8,
+  },
+  loadingSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    color: THEME.lightText,
+    marginBottom: 32,
+  },
+  loadingBar: {
+    width: 240,
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  loadingProgress: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: THEME.primary,
+    borderRadius: 3,
   },
 });
