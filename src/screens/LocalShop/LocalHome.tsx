@@ -28,6 +28,8 @@ import UseGetAllProducts from '../../hooks/use-get-all-products';
 import {useNavigation} from '@react-navigation/native';
 import {RootTabParamList} from '../../types/navigation-types';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {Shop} from '../../types/navigation-types';
+import {MockData} from '../../assets/mock-data/mock_shops';
 
 const {width} = Dimensions.get('window');
 
@@ -37,7 +39,7 @@ const imageUrls = [
   'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2hvZXN8ZW58MHx8MHx8fDA%3D',
 ];
 
-const THEME = {
+export const THEME = {
   primary: '#D5EF74', // New accent color
   secondary: '#FFFFFF', // White text/icons
   background: '#15161D', // Dark background
@@ -51,13 +53,15 @@ const LocalHome = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
   const [location, setLocation] = useState('');
+  const [products, setProducts] = useState<Shop[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const navigation = useNavigation<LocalHomeProps>();
-  const {products, loading, error} = UseGetAllProducts();
-  const limitedProducts = products.slice(0, 6);
-  if (loading) {
-    <ActivityIndicator size={'large'} color={'black'} />;
-  }
+  const [query, setQuery] = useState('');
+  // const {products, loading, error} = UseGetAllProducts();
+  // const limitedProducts = products.slice(0, 6);
+  // if (loading) {
+  //   <ActivityIndicator size={'large'} color={'black'} />;
+  // }
 
   const handleRedirect = () => {
     navigation.navigate('Search');
@@ -143,7 +147,7 @@ const LocalHome = () => {
           style={styles.locationSelector}
           onPress={() => setModalVisible(true)}>
           <FontAwesomeIcon icon={faMapPin} color={THEME.primary} size={18} />
-          <Text style={styles.locationText}>{location}</Text>
+          <Text style={styles.locationText}>{location || 'Jorhat'}</Text>
           <View style={styles.locationDot} />
         </TouchableOpacity>
 
@@ -182,6 +186,8 @@ const LocalHome = () => {
             placeholder="Search for stores"
             placeholderTextColor={THEME.lightText}
             style={styles.textInput}
+            value={query}
+            onChangeText={setQuery}
           />
         </View>
         <TouchableOpacity
@@ -194,9 +200,7 @@ const LocalHome = () => {
       {/* Promo Banner */}
       <View style={styles.label}>
         <Marquee spacing={20} speed={0.5}>
-          <Text style={styles.labelText}>
-            FLAT 50% OFF ON ALL STORES • WEEKEND SALE LIVE NOW
-          </Text>
+          <Text style={styles.labelText}>NEWLY OPENED</Text>
         </Marquee>
       </View>
 
@@ -302,8 +306,8 @@ const LocalHome = () => {
 
         {/* Shop Cards */}
         <View style={styles.shopCardsContainer}>
-          {limitedProducts.map(item => (
-            <ShopCard key={item.id} />
+          {MockData.map(item => (
+            <ShopCard item={item} key={item.id} />
           ))}
         </View>
       </ScrollView>
@@ -573,7 +577,6 @@ const styles = StyleSheet.create({
     width: 20,
   },
   shopCardsContainer: {
-    paddingHorizontal: 20,
     gap: 16,
   },
   modalBackdrop: {
