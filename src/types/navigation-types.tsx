@@ -5,17 +5,17 @@ export type RootStackParamList = {
 };
 export type RootTabParamList = {
   Home: undefined;
-  Cart: undefined;
+  Feed: undefined;
   Profile: undefined;
+  Search: undefined;
+  Details: undefined;
 };
-
-export type MockApi = {
+export type Shop = {
   id: number;
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  discountPercentage: number;
+  name: string;
+  category_id: number;
+  image: string;
+  address: string;
+  opening_time: string;
   rating: number;
-  stock: number;
 };

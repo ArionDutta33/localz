@@ -4,6 +4,7 @@ import {RootStackParamList} from '../types/navigation-types';
 import GettingStartedScreen from '../screens/GettingStartedScreen';
 import StoreSelect from '../screens/StoreSelect';
 import TabNavigation from './tabs/TabNavigation';
+import DetailsScreen from '../screens/LocalShop/DetailsScreen';
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -23,6 +24,11 @@ const RootNavigation = () => {
         options={{headerShown: false}}
         name="LocalStore"
         component={TabNavigation}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Details"
+        component={DetailsScreen}
       />
     </Stack.Navigator>
   );
