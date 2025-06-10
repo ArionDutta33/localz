@@ -7,6 +7,7 @@ export type RootTabParamList = {
   Home: undefined;
   Cart: undefined;
   Profile: undefined;
+  MyAccount: undefined;
 };
 
 export type MockApi = {
